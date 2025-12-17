@@ -305,6 +305,115 @@ const generator = {
         };
 
         const app = {
+
+            // --- HEART RATE (Web Bluetooth / BLE) ---
+            hr: {
+                device: null,
+                server: null,
+                svc: null,
+                ch: null,
+                connected: false,
+                bpm: null,
+                _boundHandler: null,
+
+                isSupported() {
+                    return !!(navigator.bluetooth && navigator.bluetooth.requestDevice);
+                },
+
+                updateUI() {
+                    const val = document.getElementById('val-hr');
+                    if (val) val.innerText = (typeof this.bpm === 'number') ? String(this.bpm) : '--';
+
+                    const btn = document.getElementById('btn-hr-connect');
+                    if (btn) {
+                        btn.classList.toggle('connected', !!this.connected);
+                        btn.innerText = this.connected ? 'PULSO ✓' : 'PULSO';
+                    }
+                },
+
+                _onDisconnected() {
+                    this.connected = false;
+                    this.bpm = null;
+                    this.server = null;
+                    this.svc = null;
+                    this.ch = null;
+                    this.updateUI();
+                    if (ui && ui.toast) ui.toast('Pulsómetro desconectado');
+                },
+
+                _parseBpm(dataView) {
+                    // Heart Rate Measurement (0x2A37)
+                    // Flags byte 0: bit0 = HR format (0=uint8, 1=uint16)
+                    if (!dataView || dataView.byteLength < 2) return null;
+                    const flags = dataView.getUint8(0);
+                    const is16 = (flags & 0x01) !== 0;
+                    return is16 ? dataView.getUint16(1, true) : dataView.getUint8(1);
+                },
+
+                async connect() {
+                    if (!this.isSupported()) {
+                        if (ui && ui.toast) ui.toast('Bluetooth no compatible en este navegador');
+                        return;
+                    }
+                    try {
+                        // Must be called from a user gesture (button click)
+                        const device = await navigator.bluetooth.requestDevice({
+                            filters: [{ services: ['heart_rate'] }]
+                        });
+                        this.device = device;
+                        this.device.addEventListener('gattserverdisconnected', () => this._onDisconnected());
+
+                        this.server = await device.gatt.connect();
+                        this.svc = await this.server.getPrimaryService('heart_rate');
+                        this.ch = await this.svc.getCharacteristic('heart_rate_measurement');
+
+                        if (this._boundHandler) {
+                            try { this.ch.removeEventListener('characteristicvaluechanged', this._boundHandler); } catch (e) {}
+                        }
+                        this._boundHandler = (ev) => {
+                            try {
+                                const dv = ev.target.value;
+                                const bpm = this._parseBpm(dv);
+                                if (typeof bpm === 'number' && bpm > 0 && bpm < 255) {
+                                    this.bpm = bpm;
+                                    this.connected = true;
+                                    this.updateUI();
+                                }
+                            } catch (e) {}
+                        };
+
+                        await this.ch.startNotifications();
+                        this.ch.addEventListener('characteristicvaluechanged', this._boundHandler);
+
+                        this.connected = true;
+                        this.updateUI();
+                        if (ui && ui.toast) ui.toast('Pulsómetro conectado');
+                    } catch (e) {
+                        // User cancel or permission denied are common; keep silent-ish
+                        this.connected = false;
+                        this.bpm = null;
+                        this.updateUI();
+                        if (ui && ui.toast) ui.toast('No se pudo conectar al pulsómetro');
+                    }
+                },
+
+                disconnect() {
+                    try {
+                        if (this.ch && this._boundHandler) {
+                            try { this.ch.removeEventListener('characteristicvaluechanged', this._boundHandler); } catch (e) {}
+                        }
+                        if (this.device && this.device.gatt && this.device.gatt.connected) {
+                            this.device.gatt.disconnect();
+                        }
+                    } catch (e) {}
+                    this._onDisconnected();
+                },
+
+                toggle() {
+                    if (this.connected) this.disconnect();
+                    else this.connect();
+                }
+            },
             data: [], idx: 0, timeLeft: 0, totalTime: 0, elapsed: 0, totalDist: 0, maxSpd: 0,
             timer: null, paused: false, videoEl: null,
 
@@ -317,6 +426,17 @@ const generator = {
                 }
                 document.getElementById('bg-video').play().catch(e=>{});
                 this.videoEl = document.getElementById('workout-video');
+            
+                // HR UI init
+                try {
+                    this.hr.updateUI();
+                    if (!this.hr.isSupported()) {
+                        const btn = document.getElementById('btn-hr-connect');
+                        if (btn) btn.style.display = 'none';
+                        const v = document.getElementById('val-hr');
+                        if (v) v.innerText = '--';
+                    }
+                } catch(e) {}
             },
 
             saveUser: function() {
@@ -693,10 +813,11 @@ this.data = data;
             skipBlock: function() { this.elapsed+=this.timeLeft; this.loadSeg(this.idx+1); },
 
             confirmExit: function() {
-                if(confirm("¿Salir? Se perderá el progreso.")) { clearInterval(this.timer); location.reload(); }
+                if(confirm("¿Salir? Se perderá el progreso.")) { try{ this.hr.disconnect(); }catch(e){} clearInterval(this.timer); location.reload(); }
             },
 
             finish: function() {
+                try{ this.hr.disconnect(); }catch(e){}
                 clearInterval(this.timer);
                 if(this.videoEl) this.videoEl.pause();
                 document.body.classList.remove('mode-workout');

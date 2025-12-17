@@ -245,7 +245,10 @@
     <div id="workout-view" class="screen">
         <div class="hud-top">
             <div style="font-weight:800; font-style:italic;">LIVE <span style="color:var(--accent)">●</span></div>
-            <div id="total-time" style="font-variant-numeric: tabular-nums; font-weight: 600; font-size:1.2rem;">00:00</div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-hr" id="btn-hr-connect" onclick="app.hr.toggle()">PULSO</button>
+                <div id="total-time" style="font-variant-numeric: tabular-nums; font-weight: 600; font-size:1.2rem;">00:00</div>
+            </div>
         </div>
 
         <div id="visualizer-container">
@@ -264,9 +267,10 @@
             </div>
         </div>
 
-        <div class="metrics-row">
+        <div class="metrics-row metrics-3">
             <div class="m-card"><div class="m-val" id="val-spd">0.0</div><div class="m-lbl">VELOCIDAD</div></div>
             <div class="m-card"><div class="m-val" id="val-inc">0</div><div class="m-lbl">PENDIENTE %</div></div>
+            <div class="m-card"><div class="m-val" id="val-hr">--</div><div class="m-lbl">PULSO</div></div>
         </div>
 
         <div class="dock">
