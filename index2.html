@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TECHNO-RUNNER ULTIMATE</title>
+    
+    <!-- FUENTE PREMIUM: INTER -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#000000">
+</head>
+<body>
+
+    <!-- VIDEO BACKGROUND SYSTEM -->
+    <div id="bg-video-container">
+        <!-- VIDEO INTRO: Mantén tu archivo -->
+        <video id="bg-video" autoplay muted loop playsinline>
+            <source src="1592344_Rear_Gym_1080x1920.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <div id="workout-video-container">
+        <!-- VIDEO WORKOUT: Mantén tu archivo -->
+        <video id="workout-video" loop muted playsinline>
+            <source src="fondo.mp4" type="video/mp4">
+        </video>
+        <div class="workout-video-overlay"></div>
+    </div>
+
+    <div class="ambient-glow"></div>
+
+    <!-- 0. ONBOARDING -->
+    <div id="onboarding-view" class="screen active">
+        <div class="onb-title">TECHNO<br><span style="color:transparent; -webkit-text-stroke: 1px white;">RUNNER</span></div>
+        <div style="font-size:1rem; color:#ccc; margin-bottom:30px;">ELITE PERFORMANCE SYSTEM</div>
+        
+        <input type="text" id="in-name" class="glass-input" placeholder="Tu Nombre" autocomplete="off">
+        <div class="form-row">
+            <input type="number" id="in-age" class="glass-input" placeholder="Edad" inputmode="numeric">
+            <input type="number" id="in-weight" class="glass-input" placeholder="Peso (kg)" inputmode="numeric">
+        </div>
+
+        <button class="btn-main" onclick="app.saveUser()">INICIAR SISTEMA</button>
+    </div>
+
+    <!-- 1. HUB / SETUP -->
+    <div id="setup-view" class="screen scrollable">
+        <div class="top-bar">
+            <div>
+                <h1 style="font-style:italic; font-weight:900; font-size:1.8rem; line-height:1;">HOLA <span id="disp-name" style="color:var(--primary)">...</span></h1>
+                <div style="font-size:0.8rem; color:#888; font-weight:600;">LISTO PARA ENTRENAR</div>
+            </div>
+            <div class="user-pill" onclick="ui.goToTab('profile')">
+                <div class="user-ava" id="nav-av">U</div>
+                <div class="xp-track"><div class="xp-fill" id="nav-xp"></div></div>
+            </div>
+        </div>
+
+        <div class="section-title">PLAN SEMANAL</div>
+        <div class="week-widget">
+            <div class="week-header">
+                <div class="today-info">HOY: <span id="plan-today-type" style="color:var(--primary)">...</span></div>
+                <div style="font-size:0.8rem; font-weight:700; color:#666;" id="plan-today-dur">-- min</div>
+            </div>
+            <div class="week-grid" id="week-grid">
+                <!-- JS Injected -->
+            </div>
+            <button class="btn-main" id="btn-do-today" style="margin-top:15px; padding:15px; font-size:0.9rem;" onclick="app.startSuggested()">HACER SESIÓN DE HOY</button>
+        </div>
+
+        <div class="section-title">ENTRENAMIENTO LIBRE</div>
+        <div class="mode-list">
+            <!-- HIIT -->
+            <div class="opt-card active" id="card-hiit" onclick="ui.selectCat('HIIT')">
+                <div class="card-head">
+                    <div style="display:flex; gap:10px;"><span style="font-size:1.4rem;">⚡</span><div class="card-title">HIIT / Sprint</div></div>
+                </div>
+                <div class="variant-scroll" id="vars-HIIT">
+                    <div class="pill active" onclick="ui.selectVar('classic', this, event)">Clásico</div>
+                    <div class="pill" onclick="ui.selectVar('tabata', this, event)">Tabata</div>
+                    <div class="pill" onclick="ui.selectVar('pyramid', this, event)">Pirámide</div>
+                </div>
+            </div>
+            <!-- HILLS -->
+            <div class="opt-card" id="card-hills" onclick="ui.selectCat('HILLS')">
+                <div class="card-head">
+                    <div style="display:flex; gap:10px;"><span style="font-size:1.4rem;">⛰️</span><div class="card-title">Montaña</div></div>
+                </div>
+                <div class="variant-scroll" id="vars-HILLS" style="display:none">
+                    <div class="pill active" onclick="ui.selectVar('rolling', this, event)">Rolling</div>
+                    <div class="pill" onclick="ui.selectVar('everest', this, event)">Everest</div>
+                </div>
+            </div>
+            <!-- ENDURANCE -->
+            <div class="opt-card" id="card-endurance" onclick="ui.selectCat('ENDURANCE')">
+                <div class="card-head">
+                    <div style="display:flex; gap:10px;"><span style="font-size:1.4rem;">🏃</span><div class="card-title">Fondo</div></div>
+                </div>
+                <div class="variant-scroll" id="vars-ENDURANCE" style="display:none">
+                    <div class="pill active" onclick="ui.selectVar('tempo', this, event)">Tempo</div>
+                    <div class="pill" onclick="ui.selectVar('prog', this, event)">Progresivo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slider-box">
+            <div class="slider-row"><span>Duración</span><span id="disp-dur">30 min</span></div>
+            <input type="range" id="rng-dur" min="15" max="60" step="5" value="30" oninput="ui.updateSliders()">
+            <div class="slider-row" style="margin-top:20px;"><span>Nivel</span><span id="disp-lvl" style="color:var(--primary)">Intermedio</span></div>
+            <input type="range" id="rng-lvl" min="0" max="2" step="1" value="1" oninput="ui.updateSliders()">
+        </div>
+
+        <button class="btn-main" style="margin: 0 24px 20px 24px; width:calc(100% - 48px);" onclick="app.start()">COMENZAR LIBRE</button>
+        <div class="dual-actions" style="margin: 0 24px 24px 24px;">
+            <button class="btn-soft" onclick="ui.openCatalog()">VER ENTRENAMIENTOS</button>
+            <button class="btn-soft" onclick="ui.openTest()">TEST DE NIVEL</button>
+        </div>
+    </div>
+
+
+    <!-- 1B. CATALOG VIEW -->
+    <div id="catalog-view" class="screen scrollable">
+        <div class="top-bar" style="margin-bottom: 10px;">
+            <div>
+                <h1 style="font-style:italic; font-weight:900; margin:0;">ENTRENAMIENTOS</h1>
+                <div style="font-size:0.8rem; color:#888; font-weight:600;">ELIGE UNO O DÉJALO EN MODO INTELIGENTE</div>
+            </div>
+            <div class="user-pill" onclick="ui.goToTab('setup')">
+                <div style="font-weight:900;">← VOLVER</div>
+            </div>
+        </div>
+
+        <div class="catalog-filters">
+            <input id="cat-search" class="glass-input" placeholder="Buscar (ej. tabata, fartlek, cuestas…)" oninput="app.renderCatalog()">
+            <div class="filter-row">
+                <select id="cat-filter-cat" class="glass-select" onchange="app.renderCatalog()">
+                    <option value="ALL">Todas</option>
+                    <option value="HIIT">HIIT</option>
+                    <option value="HILLS">HILLS</option>
+                    <option value="ENDURANCE">ENDURANCE</option>
+                </select>
+                <select id="cat-filter-stim" class="glass-select" onchange="app.renderCatalog()">
+                    <option value="ALL">Estímulo</option>
+                    <option value="vo2">VO2</option>
+                    <option value="threshold">Umbral</option>
+                    <option value="aerobic">Base</option>
+                    <option value="progression">Progresivo</option>
+                    <option value="fartlek">Fartlek</option>
+                    <option value="hill_strength">Cuestas fuerza</option>
+                    <option value="hill_endurance">Cuestas resistencia</option>
+                    <option value="recovery">Suave</option>
+                    <option value="benchmark">Benchmark</option>
+                </select>
+                <select id="cat-filter-dur" class="glass-select" onchange="app.renderCatalog()">
+                    <option value="ALL">Duración</option>
+                    <option value="15">15–20</option>
+                    <option value="25">25–30</option>
+                    <option value="35">35–40</option>
+                    <option value="45">45–50</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="catalog-list" id="catalog-list"></div>
+    </div>
+
+    <!-- 1C. TEST VIEW -->
+    <div id="test-view" class="screen scrollable">
+        <div class="top-bar" style="margin-bottom: 10px;">
+            <div>
+                <h1 style="font-style:italic; font-weight:900; margin:0;">TEST DE NIVEL</h1>
+                <div style="font-size:0.8rem; color:#888; font-weight:600;">12 MIN · AJUSTE AUTOMÁTICO</div>
+            </div>
+            <div class="user-pill" onclick="ui.goToTab('setup')">
+                <div style="font-weight:900;">← VOLVER</div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin: 0 24px;">
+            <div style="font-weight:900; font-size:1.05rem; margin-bottom:10px;">Cómo funciona</div>
+            <div style="color:#bbb; line-height:1.5; font-size:0.95rem;">
+                Harás un <b>test de 12 minutos</b> a ritmo fuerte pero sostenible. Al terminar, la app calculará tu distancia y ajustará tu nivel.
+            </div>
+            <div style="margin-top:12px; color:#888; font-size:0.85rem;">
+                Consejo: empieza conservador y sube si puedes. Mejor hacerlo descansado.
+            </div>
+        </div>
+
+        <button class="btn-main" style="margin: 18px 24px 12px 24px; width: calc(100% - 48px);" onclick="app.startLevelTest()">
+            INICIAR TEST 12 MIN
+        </button>
+
+        <div id="test-result" class="panel" style="margin: 0 24px; display:none;">
+            <div style="font-weight:900; font-size:1.05rem; margin-bottom:10px;">Resultado</div>
+            <div id="test-result-text" style="color:#bbb; line-height:1.5; font-size:0.95rem;"></div>
+        </div>
+    </div>
+
+    <!-- 2. HISTORY VIEW -->
+    <div id="history-view" class="screen scrollable">
+        <h1 style="font-style:italic; margin: 0 24px 20px 24px;">DIARIO</h1>
+        <div class="hist-list" id="hist-container">
+            <!-- JS Injected -->
+        </div>
+        <button onclick="app.clearData()" style="background:none; border:none; color:#555; width:100%; padding:20px;">Borrar Datos</button>
+    </div>
+
+    <!-- 3. PROFILE VIEW -->
+    <div id="profile-view" class="screen scrollable">
+        <div style="text-align:center; padding-top:20px;">
+            <div style="width:100px; height:100px; background:var(--primary); color:black; font-size:3rem; font-weight:900; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto;" id="prof-av">U</div>
+            <h1 id="prof-name" style="font-style:italic;">USUARIO</h1>
+            <div style="color:var(--text-sec); font-weight:700;">NIVEL <span id="prof-lvl" style="color:white;">1</span></div>
+            
+            <div style="width:200px; height:6px; background:#333; margin:10px auto; border-radius:3px; overflow:hidden;">
+                <div id="prof-xp-bar" style="width:0%; height:100%; background:var(--gold);"></div>
+            </div>
+            <div style="font-size:0.7rem; color:#888;" id="prof-xp-txt">0 / 1000 XP</div>
+        </div>
+
+        <div class="section-title">INSIGNIAS</div>
+        <div class="badges-scroll" id="badge-container">
+            <!-- JS Injected -->
+        </div>
+
+        <div class="section-title">ESTADÍSTICAS</div>
+        <div class="metrics-row" style="margin-top:10px;">
+            <div class="m-card"><div class="m-val" id="stat-km">0</div><div class="m-lbl">KM TOTALES</div></div>
+            <div class="m-card"><div class="m-val" id="stat-sess">0</div><div class="m-lbl">SESIONES</div></div>
+            <div class="m-card"><div class="m-val" id="stat-cal">0</div><div class="m-lbl">KCAL</div></div>
+            <div class="m-card"><div class="m-val" id="stat-streak">0</div><div class="m-lbl">RACHA</div></div>
+        </div>
+    </div>
+
+    <!-- 4. WORKOUT VIEW (VISUALIZER) -->
+    <div id="workout-view" class="screen">
+        <div class="hud-top">
+            <div style="font-weight:800; font-style:italic;">LIVE <span style="color:var(--accent)">●</span></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-hr" id="btn-hr-connect" onclick="app.hr.toggle()">PULSO</button>
+                <div id="total-time" style="font-variant-numeric: tabular-nums; font-weight: 600; font-size:1.2rem;">00:00</div>
+            </div>
+        </div>
+
+        <div id="visualizer-container">
+            <!-- JS Injected Bars -->
+        </div>
+
+        <div class="ring-container">
+            <svg class="progress-svg" viewBox="0 0 280 280">
+                <circle class="ring-bg" cx="140" cy="140" r="130"></circle>
+                <circle class="ring-fg" id="ring-arc" cx="140" cy="140" r="130" stroke-dasharray="816" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="ring-data">
+                <div class="phase-name" id="ph-title" style="color:var(--primary)">SPRINT</div>
+                <div class="main-timer" id="ph-timer">00:00</div>
+                <div style="margin-top:10px; font-size:0.9rem; color:#ccc; background:rgba(0,0,0,0.6); padding:4px 12px; border-radius:20px; display:inline-block;" id="ph-next">Sig: ---</div>
+            </div>
+        </div>
+
+        <div class="metrics-row metrics-3">
+            <div class="m-card"><div class="m-val" id="val-spd">0.0</div><div class="m-lbl">VELOCIDAD</div></div>
+            <div class="m-card"><div class="m-val" id="val-inc">0</div><div class="m-lbl">PENDIENTE %</div></div>
+            <div class="m-card"><div class="m-val" id="val-hr">--</div><div class="m-lbl">PULSO</div></div>
+        </div>
+
+        <div class="dock">
+            <button class="btn-dock btn-stop" onclick="app.confirmExit()">STOP</button>
+            <button class="btn-dock btn-pause" id="btn-pause" onclick="app.togglePause()">II</button>
+            <button class="btn-dock btn-skip" onclick="app.skipBlock()">SALTAR</button>
+        </div>
+
+        <div id="alert-overlay"><div class="big-num" id="ov-num">3</div></div>
+    </div>
+
+    <!-- 5. SUMMARY -->
+    <div id="summary-view" class="screen scrollable" style="text-align:center;">
+        <h1 style="font-style:italic; font-size:2.5rem; margin-top:20px;">SESIÓN<br>FINALIZADA</h1>
+        <div style="width:40px; height:4px; background:var(--primary); margin:20px auto;"></div>
+        
+        <div style="margin:30px 0;">
+            <div style="font-size:4rem; font-weight:900; color:var(--primary); text-shadow:0 0 30px rgba(204,255,0,0.3);" id="sum-xp">+0 XP</div>
+            <div style="font-size:0.8rem; color:#888; font-weight:700; letter-spacing:2px;">PROGRESO NIVEL</div>
+        </div>
+
+        <div class="metrics-row">
+            <div class="m-card"><div class="m-val" id="sum-dist">0.0</div><div class="m-lbl">KM</div></div>
+            <div class="m-card"><div class="m-val" id="sum-cal">0</div><div class="m-lbl">KCAL</div></div>
+            <div class="m-card"><div class="m-val" id="sum-time">00:00</div><div class="m-lbl">TIEMPO</div></div>
+            <div class="m-card"><div class="m-val" id="sum-pk">0.0</div><div class="m-lbl">MAX SPD</div></div>
+        </div>
+
+        <button class="btn-main" style="width:calc(100% - 48px); margin:20px 24px;" onclick="location.reload()">MENU PRINCIPAL</button>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar" id="main-nav" style="display:none;">
+        <button class="tab-btn active" onclick="ui.goToTab('setup')"><span>⚡</span><span class="tab-lbl">RUN</span></button>
+        <button class="tab-btn" onclick="ui.goToTab('history')"><span>📅</span><span class="tab-lbl">DIARIO</span></button>
+        <button class="tab-btn" onclick="ui.goToTab('profile')"><span>🏆</span><span class="tab-lbl">PERFIL</span></button>
+    </div>
+
+    <script defer src="app.js"></script>
+</body>
+</html>
