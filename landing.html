@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TECHNO-RUNNER | Actualiza tu Cinta</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-highlight: #1E1E1E;
+            --primary: #CCFF00; /* Volt Green */
+            --primary-glow: rgba(204, 255, 0, 0.15);
+            --text-main: #FFFFFF;
+            --text-sub: #A0A0A0;
+            --border: rgba(255, 255, 255, 0.1);
+            --font: 'Inter', sans-serif;
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font);
+            overflow-x: hidden;
+            padding-bottom: calc(90px + var(--safe-bottom)); /* Espacio para el botón fijo */
+            background-image: radial-gradient(circle at top center, #1a1a1a 0%, #000 60%);
+        }
+
+        /* --- TYPOGRAPHY & UTILS --- */
+        .container { padding: 0 20px; max-width: 500px; margin: 0 auto; }
+        h1, h2, h3 { letter-spacing: -0.04em; line-height: 1.1; }
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #999);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .highlight { color: var(--primary); }
+        
+        /* --- HEADER & HERO --- */
+        .header {
+            padding: 20px 0; display: flex; justify-content: center; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 50; background: rgba(0,0,0,0.7);
+        }
+        .logo { font-weight: 900; font-style: italic; font-size: 1.2rem; letter-spacing: -1px; }
+
+        .hero { padding: 40px 20px 0; text-align: center; }
+        
+        .pill-badge {
+            background: rgba(204, 255, 0, 0.1); color: var(--primary); border: 1px solid rgba(204, 255, 0, 0.3);
+            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            display: inline-block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 15px; }
+        
+        .hero-desc { color: var(--text-sub); font-size: 1.1rem; line-height: 1.5; margin-bottom: 22px; }
+
+        /* CTA extra en hero (para subir conversión) */
+        .hero-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+        .cta-note {
+            font-size: 0.85rem;
+            color: #777;
+            font-weight: 600;
+        }
+
+        /* --- ANIMATED PHONE (Centerpiece) --- */
+        .phone-stage {
+            width: 100%; height: 500px; position: relative; display: flex; justify-content: center;
+            perspective: 800px; margin-bottom: 20px;
+        }
+        .phone-body {
+            width: 260px; height: 520px; background: #000;
+            border-radius: 35px; border: 4px solid #333;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px var(--primary-glow);
+            transform: rotateX(5deg); position: relative; overflow: hidden;
+            animation: float 6s ease-in-out infinite;
+        }
+        .notch { 
+            position: absolute; top:0; left:50%; transform:translateX(-50%); 
+            width:100px; height:24px; background:#222; border-radius:0 0 12px 12px; z-index:10; 
+        }
+        
+        /* Simulated UI inside Phone */
+        .app-screen { padding: 40px 15px; height: 100%; background: linear-gradient(180deg, #151515 0%, #000 100%); display:flex; flex-direction: column; justify-content: space-between; }
+        
+        .stat-ring {
+            width: 160px; height: 160px; border-radius: 50%; border: 4px solid #222; margin: 20px auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .stat-ring::after {
+            content:''; position: absolute; top:-4px; left:-4px; right:-4px; bottom:-4px;
+            border-radius: 50%; border: 4px solid transparent; border-top-color: var(--primary);
+            animation: spin 2s linear infinite;
+        }
+        .app-big-num { font-size: 3.5rem; font-weight: 800; line-height: 1; color: white; }
+        .app-label { font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-top: 5px; }
+        
+        .app-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .app-card { background: #222; padding: 10px; border-radius: 10px; text-align: center; }
+        .app-card b { display: block; font-size: 1.1rem; color: white; }
+        .app-card span { font-size: 0.6rem; color: #777; font-weight: 700; }
+
+        /* --- PROBLEM / SOLUTION (Vertical Stack) --- */
+        .pain-points { padding: 40px 20px; }
+        .section-head { margin-bottom: 30px; }
+        .section-head h2 { font-size: 2rem; margin-bottom: 10px; font-weight: 800; }
+        .section-head p { color: var(--text-sub); }
+
+        .feature-stack { display: flex; flex-direction: column; gap: 20px; }
+        .feature-card {
+            background: var(--surface); border: 1px solid var(--border); padding: 25px;
+            border-radius: 20px; display: flex; gap: 20px; align-items: flex-start;
+            transition: transform 0.2s;
+        }
+        .feature-card:active { transform: scale(0.98); background: var(--surface-highlight); }
+        
+        .f-icon { 
+            width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);
+        }
+        .f-content h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; color: white; }
+        .f-content p { font-size: 0.95rem; color: var(--text-sub); line-height: 1.4; }
+
+        /* --- COMPARISON TABLE (The Hammer) --- */
+        .comparison { padding: 20px 20px 50px; background: #080808; border-top: 1px solid #222; border-bottom: 1px solid #222; }
+        .comp-title { text-align: center; margin-bottom: 30px; }
+        
+        .comp-table { width: 100%; border-collapse: collapse; }
+        .comp-table th { text-align: left; padding: 15px 10px; color: #666; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #333; }
+        .comp-table td { padding: 20px 10px; border-bottom: 1px solid #222; vertical-align: middle; }
+        
+        .col-old { width: 45%; color: #666; font-size: 0.95rem; }
+        .col-new { width: 55%; color: white; font-weight: 700; font-size: 1rem; position: relative; }
+        .col-new::before { content:''; position: absolute; left: 0; top: 15px; bottom: 15px; width: 2px; background: var(--primary); }
+        .col-new span { padding-left: 15px; display: block; }
+        
+        /* --- COMPETITOR ANGLE --- */
+        .why-free { padding: 50px 20px; text-align: center; background: linear-gradient(180deg, #000 0%, #111 100%); }
+        .strike-price { text-decoration: line-through; color: #666; font-size: 1.2rem; }
+        .big-price { font-size: 3.5rem; font-weight: 900; color: var(--primary); line-height: 1; margin: 10px 0; }
+        .price-desc { color: var(--text-sub); margin-bottom: 30px; font-size: 1rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+        
+        .vs-badge { 
+            display: inline-block; background: #222; padding: 5px 10px; border-radius: 4px; 
+            font-size: 0.7rem; color: #fff; margin-bottom: 15px; border: 1px solid #333; 
+        }
+
+        /* --- STICKY CTA --- */
+        .sticky-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
+            border-top: 1px solid #333;
+            padding: 15px 20px calc(15px + var(--safe-bottom));
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 100;
+        }
+        .user-count { font-size: 0.8rem; color: #888; font-weight: 500; display: flex; flex-direction: column; }
+        .user-count span { color: var(--primary); font-weight: 700; }
+        
+        .btn-main {
+            background: var(--primary); color: #000; text-decoration: none;
+            padding: 14px 28px; border-radius: 50px; font-weight: 800; font-size: 1rem;
+            box-shadow: 0 0 25px rgba(204, 255, 0, 0.25);
+            transition: transform 0.1s;
+        }
+        .btn-main:active { transform: scale(0.95); }
+
+        @keyframes float { 0%, 100% { transform: rotateX(5deg) translateY(0); } 50% { transform: rotateX(5deg) translateY(-15px); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav class="header">
+        <div class="logo">TECHNO<span class="highlight">RUNNER</span></div>
+    </nav>
+
+    <div class="container">
+        
+        <!-- HERO -->
+        <section class="hero">
+            <div class="pill-badge">Versión 2.0 Lanzada</div>
+            <h1>TU CINTA,<br><span class="text-gradient">ACTUALIZADA.</span></h1>
+            <p class="hero-desc">No necesitas comprar una máquina nueva de 2.000€. Convierte la que ya tienes en un sistema de entrenamiento inteligente hoy mismo.</p>
+            
+            <!-- CTA extra en hero -->
+            <div class="hero-cta">
+                <a href="index.html" class="btn-main">EMPEZAR AHORA</a>
+                <div class="cta-note">Acceso inmediato</div>
+            </div>
+
+            <div class="phone-stage">
+                <div class="phone-body">
+                    <div class="notch"></div>
+                    <div class="app-screen">
+                        
+                        <div class="stat-ring">
+                            <div class="app-big-num">12.5</div>
+                            <div class="app-label">KM/H</div>
+                        </div>
+
+                        <div style="background:#222; border-radius:8px; padding:10px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#888; margin-bottom:5px;">
+                                <span>INTERVALO 2/5</span>
+                                <span style="color:var(--primary);">SPRINT</span>
+                            </div>
+                            <div style="height:6px; background:#444; border-radius:3px; overflow:hidden;">
+                                <div style="width:70%; height:100%; background:var(--primary);"></div>
+                            </div>
+                        </div>
+
+                        <div class="app-row">
+                            <div class="app-card">
+                                <b>4:45</b>
+                                <span>RITMO</span>
+                            </div>
+                            <div class="app-card">
+                                <b>210</b>
+                                <span>KCAL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROBLEMS & SOLUTIONS (STACK VERTICAL) -->
+        <section class="pain-points">
+            <div class="section-head">
+                <h2>BASTA DE <br><span class="highlight">ABURRIMIENTO</span></h2>
+                <p>Las cintas del gimnasio tienen pantallas de los años 90. Son aburridas, imprecisas y no guardan tus datos. <br><br>Hemos solucionado eso.</p>
+            </div>
+
+            <div class="feature-stack">
+                <!-- Card 1 -->
+                <div class="feature-card">
+                    <div class="f-icon">🧠</div>
+                    <div class="f-content">
+                        <h3>No pienses, corre</h3>
+                        <p>El algoritmo genera rutinas HIIT (Series, Pirámides, Fartlek) adaptadas a tu nivel. Olvídate de cambiar la velocidad manualmente sin sentido.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="feature-card">
+                    <div class="f-icon">📊</div>
+                    <div class="f-content">
+                        <h3>Panel OLED Futurista</h3>
+                        <p>Diseñado con alto contraste y números gigantes para que puedas leer tus métricas incluso esprintando a máxima velocidad.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="feature-card">
+                    <div class="f-icon">🔒</div>
+                    <div class="f-content">
+                        <h3>Privacidad Local</h3>
+                        <p>Tus datos se quedan en tu móvil. Sin nubes, sin registros obligatorios, sin vender tu info a terceros. 100% tuyo.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPARISON TABLE (Direct & Brutal) -->
+        <section class="comparison">
+            <div class="comp-title">
+                <h2>TU GIMNASIO <span style="color:#555">VS</span> TECHNO</h2>
+            </div>
+            
+            <table class="comp-table">
+                <thead>
+                    <tr>
+                        <th style="width:40%">CINTA ESTÁNDAR</th>
+                        <th>CON TECHNO-RUNNER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-old">Pantalla LCD gris aburrida</td>
+                        <td class="col-new"><span>Interfaz OLED Viva</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-old">Botones físicos sudados</td>
+                        <td class="col-new"><span>Audio Coach Inteligente</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-old">Datos se borran al acabar</td>
+                        <td class="col-new"><span>Historial Permanente</span></td>
+                    </tr>
+                    <tr>
+                        <td class="col-old">Programas genéricos</td>
+                        <td class="col-new"><span>IA Adaptativa</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- COMPETITOR / PRICING ANGLE -->
+        <section class="why-free">
+            <div class="vs-badge">COMPARADO CON ZWIFT / PELOTON</div>
+            <div class="strike-price">14.99€ / mes</div>
+            <div class="big-price">0€</div>
+            <p class="price-desc">Sin suscripciones mensuales. Sin anuncios intrusivos. Creemos que entrenar bien no debería ser un lujo.</p>
+            
+            <div style="opacity: 0.6; font-size: 0.8rem; margin-top: 20px;">
+                <p>"La mejor herramienta gratuita para corredores indoor."</p>
+                <p>— Beta Tester Group 2024</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- STICKY BOTTOM BAR -->
+    <div class="sticky-bar">
+        <div class="user-count">
+            Únete a
+            <span>+2,400 Runners</span>
+        </div>
+        <a href="index.html" class="btn-main">EMPEZAR AHORA</a>
+    </div>
+
+</body>
+</html>
